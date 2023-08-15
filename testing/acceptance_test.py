@@ -1698,6 +1698,140 @@ class TestExternalScope:
             {"gw0": 5, "gw1": 10},
         )
 
+    def test_by_function(self, testdir):
+        test_file = """
+            import pytest
+            
+            @pytest.mark.parametrize('i', range(5))
+            def test_a(i):
+                pass
+
+            @pytest.mark.parametrize('i', range(5))
+            def test_b(i):
+                pass
+        """
+        scopes = """
+        test_a.py::test_a,1
+        test_a.py::test_b,2
+        """
+        testdir.makefile(".csv", scopes=scopes)
+        testdir.makepyfile(test_a=test_file)
+        result = testdir.runpytest(
+            "-n2", "--dist=loadexternal", "-v", "--scopes=scopes.csv"
+        )
+        test_a_workers_and_test_count = get_workers_and_test_count_by_prefix(
+            "test_a.py::test_a", result.outlines
+        )
+        test_b_workers_and_test_count = get_workers_and_test_count_by_prefix(
+            "test_a.py::test_b", result.outlines
+        )
+        tests_run_by_workers = get_tests_run_by_worker(result.outlines)
+
+        assert test_a_workers_and_test_count in (
+            {"gw0": 5},
+            {"gw1": 0},
+        ) or test_a_workers_and_test_count in ({"gw0": 0}, {"gw1": 5})
+        assert test_b_workers_and_test_count in (
+            {"gw0": 5},
+            {"gw1": 0},
+        ) or test_b_workers_and_test_count in ({"gw0": 0}, {"gw1": 5})
+        assert tests_run_by_workers == {"gw0": 5, "gw1": 5}
+
+    def test_by_function_same_group(self, testdir):
+        test_file = """
+            import pytest
+
+            @pytest.mark.parametrize('i', range(5))
+            def test_a(i):
+                pass
+
+            @pytest.mark.parametrize('i', range(5))
+            def test_b(i):
+                pass
+        """
+        scopes = """
+        test_a.py::test_a,1
+        test_a.py::test_b,1
+        """
+        testdir.makefile(".csv", scopes=scopes)
+        testdir.makepyfile(test_a=test_file)
+        result = testdir.runpytest(
+            "-n2", "--dist=loadexternal", "-v", "--scopes=scopes.csv"
+        )
+        test_a_workers_and_test_count = get_workers_and_test_count_by_prefix(
+            "test_a.py::test_a", result.outlines
+        )
+        test_b_workers_and_test_count = get_workers_and_test_count_by_prefix(
+            "test_a.py::test_b", result.outlines
+        )
+        tests_run_by_workers = get_tests_run_by_worker(result.outlines)
+
+        assert test_a_workers_and_test_count in (
+            {"gw0": 5},
+            {"gw1": 0},
+        ) or test_a_workers_and_test_count in ({"gw0": 0}, {"gw1": 5})
+        assert test_b_workers_and_test_count in (
+            {"gw0": 5},
+            {"gw1": 0},
+        ) or test_b_workers_and_test_count in ({"gw0": 0}, {"gw1": 5})
+        assert tests_run_by_workers in (
+            {"gw0": 10}, {"gw1": 10}
+        )
+
+    def test_by_function_unequal_weighed_group(self, testdir):
+        test_file = """
+            import pytest
+
+            @pytest.mark.parametrize('i', range(5))
+            def test_a(i):
+                pass
+
+            @pytest.mark.parametrize('i', range(5))
+            def test_b(i):
+                pass
+
+            @pytest.mark.parametrize('i', range(5))
+            def test_c(i):
+                pass
+        """
+        scopes = """
+        test_a.py::test_a,1
+        test_a.py::test_b,2
+        test_a.py::test_c,1
+        """
+        testdir.makefile(".csv", scopes=scopes)
+        testdir.makepyfile(test_a=test_file)
+        result = testdir.runpytest(
+            "-n2", "--dist=loadexternal", "-v", "--scopes=scopes.csv"
+        )
+        test_a_workers_and_test_count = get_workers_and_test_count_by_prefix(
+            "test_a.py::test_a", result.outlines
+        )
+        test_b_workers_and_test_count = get_workers_and_test_count_by_prefix(
+            "test_a.py::test_b", result.outlines
+        )
+        test_c_workers_and_test_count = get_workers_and_test_count_by_prefix(
+            "test_a.py::test_c", result.outlines
+        )
+        tests_run_by_workers = get_tests_run_by_worker(result.outlines)
+
+        assert test_a_workers_and_test_count in (
+            {"gw0": 5},
+            {"gw1": 0},
+        ) or test_a_workers_and_test_count in ({"gw0": 0}, {"gw1": 5})
+        assert test_b_workers_and_test_count in (
+            {"gw0": 5},
+            {"gw1": 0},
+        ) or test_b_workers_and_test_count in ({"gw0": 0}, {"gw1": 5})
+        assert test_c_workers_and_test_count in (
+            {"gw0": 5},
+            {"gw1": 0},
+        ) or test_c_workers_and_test_count in ({"gw0": 0}, {"gw1": 5})
+        assert tests_run_by_workers in (
+            {"gw0": 10, "gw1": 5},
+            {"gw0": 5, "gw1": 10},
+        )
+
 
 class TestLocking:
     _test_content = """

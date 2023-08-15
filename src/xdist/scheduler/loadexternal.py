@@ -1,3 +1,4 @@
+import contextlib
 import csv
 
 from .loadscope import LoadScopeScheduling
@@ -76,19 +77,32 @@ class LoadExternalScheduling(LoadScopeScheduling):
             example/loadsuite/test/test_delta.py
             example/loadsuite/epsilon/__init__.py
         """
+        # look up by the raw nodeid
         scope = self.scopes.get(nodeid)
         if scope:
             return scope
 
-        class_or_file = "::".join(nodeid.split("::")[:-1])
-        scope = self.scopes.get(class_or_file)
-        if scope:
-            return scope
+        # strip out any parametrization matrix
+        with contextlib.suppress(ValueError):
+            parametrized_start_idx = nodeid.index("[")
+            nodeid = nodeid[:parametrized_start_idx]
 
-        file = "::".join(class_or_file.split("::")[:-1])
-        if len(file) > 0:
-            scope = self.scopes.get(file)
+            scope = self.scopes.get(nodeid)
             if scope:
                 return scope
 
+        # look at the class (if of form test_a.py::TestClass::test_a) or file (if of form test_a.py::test_a)
+        nodeid = "::".join(nodeid.split("::")[:-1])
+        scope = self.scopes.get(nodeid)
+        if scope:
+            return scope
+
+        # look at the file (if of form test_a.py::TestClass::test_a)
+        nodeid = "::".join(nodeid.split("::")[:-1])
+        if len(nodeid) > 0:
+            scope = self.scopes.get(nodeid)
+            if scope:
+                return scope
+
+        # give up and return the nodeid, to distribute to whichever worker gets it first
         return nodeid
