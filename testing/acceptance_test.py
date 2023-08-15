@@ -1511,7 +1511,8 @@ class TestExternalScope:
             == test_b_workers_and_test_count.items()
         )
         assert tests_run_by_workers in (
-            {"gw0": 10}, {"gw1": 10},
+            {"gw0": 10},
+            {"gw1": 10},
         )
 
     def test_by_module_unequal_weighed_group(self, testdir):
@@ -1638,9 +1639,7 @@ class TestExternalScope:
             {"gw0": 5},
             {"gw1": 0},
         ) or test_b_workers_and_test_count in ({"gw0": 0}, {"gw1": 5})
-        assert tests_run_by_workers in (
-            {"gw0": 10}, {"gw1": 10}
-        )
+        assert tests_run_by_workers in ({"gw0": 10}, {"gw1": 10})
 
     def test_by_class_unequal_weighed_group(self, testdir):
         test_file = """
@@ -1701,7 +1700,7 @@ class TestExternalScope:
     def test_by_function(self, testdir):
         test_file = """
             import pytest
-            
+
             @pytest.mark.parametrize('i', range(5))
             def test_a(i):
                 pass
@@ -1774,9 +1773,7 @@ class TestExternalScope:
             {"gw0": 5},
             {"gw1": 0},
         ) or test_b_workers_and_test_count in ({"gw0": 0}, {"gw1": 5})
-        assert tests_run_by_workers in (
-            {"gw0": 10}, {"gw1": 10}
-        )
+        assert tests_run_by_workers in ({"gw0": 10}, {"gw1": 10})
 
     def test_by_function_unequal_weighed_group(self, testdir):
         test_file = """
