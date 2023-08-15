@@ -183,7 +183,12 @@ def pytest_addoption(parser):
         "--scopes",
         action="store",
         type=str,
-        help=("Required custom scopes file to use with --dist=loadexternal."),
+        help=(
+            "Custom scopes file. Required when using --dist=loadexternal. ",
+            "The file provided must be a CSV file with two columns, one for "
+            "the nodeid to match on (exact, class/function, file), and the "
+            "other the scope to assign to the test."
+        ),
     )
 
     parser.addini(
