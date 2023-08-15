@@ -100,6 +100,7 @@ def pytest_addoption(parser):
             "loadscope",
             "loadfile",
             "loadgroup",
+            "loadexternal",
             "worksteal",
             "no",
         ],
@@ -177,6 +178,12 @@ def pytest_addoption(parser):
             "worker at the start. Only later tests can be scheduled one by one. "
             "Unlimited if not set."
         ),
+    )
+    group.addoption(
+        "--scopes",
+        action="store",
+        type=str,
+        help=("Required custom scopes file to use with --dist=loadexternal."),
     )
 
     parser.addini(

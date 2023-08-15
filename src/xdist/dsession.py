@@ -9,6 +9,7 @@ from xdist.remote import Producer
 from xdist.workermanage import NodeManager
 from xdist.scheduler import (
     EachScheduling,
+    LoadExternalScheduling,
     LoadScheduling,
     LoadScopeScheduling,
     LoadFileScheduling,
@@ -106,6 +107,7 @@ class DSession:
             "loadscope": LoadScopeScheduling,
             "loadfile": LoadFileScheduling,
             "loadgroup": LoadGroupScheduling,
+            "loadexternal": LoadExternalScheduling,
             "worksteal": WorkStealingScheduling,
         }
         return schedulers[dist](config, log)
