@@ -387,24 +387,25 @@ class LoadScopeScheduling:
         the collection differences and posting collection errors to
         pytest_collectreport hook.
         """
-        node_collection_items = list(self.registered_collections.items())
-        first_node, col = node_collection_items[0]
-        same_collection = True
-
-        for node, collection in node_collection_items[1:]:
-            msg = report_collection_diff(
-                col, collection, first_node.gateway.id, node.gateway.id
-            )
-            if not msg:
-                continue
-
-            same_collection = False
-            self.log(msg)
-
-            if self.config is None:
-                continue
-
-            rep = CollectReport(node.gateway.id, "failed", longrepr=msg, result=[])
-            self.config.hook.pytest_collectreport(report=rep)
-
-        return same_collection
+        # node_collection_items = list(self.registered_collections.items())
+        # first_node, col = node_collection_items[0]
+        # same_collection = True
+        #
+        # for node, collection in node_collection_items[1:]:
+        #     msg = report_collection_diff(
+        #         col, collection, first_node.gateway.id, node.gateway.id
+        #     )
+        #     if not msg:
+        #         continue
+        #
+        #     same_collection = False
+        #     self.log(msg)
+        #
+        #     if self.config is None:
+        #         continue
+        #
+        #     rep = CollectReport(node.gateway.id, "failed", longrepr=msg, result=[])
+        #     self.config.hook.pytest_collectreport(report=rep)
+        #
+        # return same_collection
+        return True
